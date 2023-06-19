@@ -1,18 +1,12 @@
-FROM maven:3.6.0-jdk-11-slim AS build
-WORKDIR /home/app
-COPY pom.xml .
-COPY src src
-ENV MAVEN_CONFIG=''
-RUN mvn package
-
-FROM tomcat:latest
-
-LABEL maintainer="Nidhi Gupta"
-
-COPY --from=build /home/app/target/LoginWebApp-1.war /usr/local/tomcat/webapps/LoginWebApp-1.war
-#ADD ./target/LoginWebApp-1.war /usr/local/tomcat/webapps/
-
-EXPOSE 8080
-
-CMD ["catalina.sh", "run"]
-
+FROM centos:latest
+RUN cd /etc/yum.repos.d/
+RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+RUN yum install httpd wget zip unzip -y
+ADD https://www.tooplate.com/zip-templates/2121_wave_cafe.zip /var/www/html
+WORKDIR /var/www/html
+RUN unzip -o 2121_wave_cafe.zip
+RUN cp -r 2121_wave_cafe/* .
+RUN rm -rf 2121_wave_cafe 2121_wave_cafe.zip
+CMD ["/usr/sbin/httpd","-D","FOREGROUND"]
+EXPOSE 80 30000
